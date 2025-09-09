@@ -4,7 +4,7 @@
 **Team Name:** Team 1
 
 **Members:**
-- Angel Keybui
+- Angel Kibui
 - Brenda Maina
 - Mutheyu Mbithi
 
