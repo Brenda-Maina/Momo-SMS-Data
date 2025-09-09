@@ -6,7 +6,7 @@
 **Members:**
 - Angel Kibui
 - Brenda Maina
-- Mutheyu Mbithi
+- Ndunge Mbithi
 
 ---
 
