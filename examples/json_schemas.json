@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "description": "JSON schemas matching the MySQL database structure",
+  "database_tables": ["users", "channels", "transaction_categories", "transactions", "assignments", "system_logs"],
+  
+  "user_example": {
+    "user_id": 1,
+    "name": "Amina Mwangi",
+    "phone": "+254712345001",
+    "email": "amina@example.com",
+    "created_at": "2025-09-14T10:00:00Z"
+  },
+
+  "channel_example": {
+    "channel_id": 1,
+    "channel_name": "MoMo SMS",
+    "description": "Mobile money SMS ingestion channel",
+    "created_at": "2025-09-14T10:00:00Z"
+  },
+
+  "category_example": {
+    "category_id": 1,
+    "category_name": "Airtime Topup",
+    "code": "airtime",
+    "description": "Airtime purchase or transfer",
+    "created_at": "2025-09-14T10:00:00Z"
+  },
+
+  "transaction_example": {
+    "transaction_id": 1,
+    "momo_txn_id": "momo-0001",
+    "amount_cents": 25000,
+    "amount_currency": "KES",
+    "amount_decimal": 250.00,
+    "transaction_date": "2025-09-14T10:15:00Z",
+    "narration": "Payment for groceries",
+    "balance_cents": 150000,
+    "balance_decimal": 1500.00,
+    "status": "SUCCESS",
+    "created_at": "2025-09-14T10:16:00Z"
+  },
+
+  "assignment_example": {
+    "assignment_id": 1,
+    "transaction_id": 1,
+    "category_id": 2,
+    "tagged_at": "2025-09-14T10:17:00Z"
+  },
+
+  "system_log_example": {
+    "log_id": 1,
+    "transaction_id": 1,
+    "log_level": "INFO",
+    "message": "Parsed successfully",
+    "log_date": "2025-09-14T10:18:00Z"
+  },
+
+  "complete_transaction_example": {
+    "transaction": {
+      "transaction_id": 1,
+      "momo_txn_id": "momo-0001",
+      "amount_cents": 25000,
+      "amount_currency": "KES",
+      "amount_decimal": 250.00,
+      "transaction_date": "2025-09-14T10:15:00Z",
+      "narration": "Payment for groceries",
+      "balance_cents": 150000,
+      "balance_decimal": 1500.00,
+      "status": "SUCCESS",
+      "created_at": "2025-09-14T10:16:00Z"
+    },
+    
+    "sender": {
+      "user_id": 1,
+      "name": "Amina Mwangi",
+      "phone": "+254712345001",
+      "email": "amina@example.com"
+    },
+    
+    "receiver": {
+      "user_id": 3,
+      "name": "Grace Wanjiru",
+      "phone": "+254712345003",
+      "email": "grace@example.com"
+    },
+    
+    "channel": {
+      "channel_id": 1,
+      "channel_name": "MoMo SMS",
+      "description": "Mobile money SMS ingestion channel"
+    },
+    
+    "categories": [
+      {
+        "category_id": 2,
+        "category_name": "Merchant Payment",
+        "code": "merchant",
+        "description": "Payment to merchant"
+      },
+      {
+        "category_id": 5,
+        "category_name": "Refund",
+        "code": "refund",
+        "description": "Refunds or reversals"
+      }
+    ],
+    
+    "processing_logs": [
+      {
+        "log_id": 1,
+        "log_level": "INFO",
+        "message": "Parsed successfully",
+        "log_date": "2025-09-14T10:18:00Z"
+      }
+    ],
+    
+    "assignments": [
+      {
+        "assignment_id": 1,
+        "category_id": 2,
+        "tagged_at": "2025-09-14T10:17:00Z"
+      },
+      {
+        "assignment_id": 2,
+        "category_id": 5,
+        "tagged_at": "2025-09-14T10:17:30Z"
+      }
+    ]
+  },
+
+  "table_to_json_mapping": {
+    "users": {
+      "table": "users",
+      "json_example": "user_example",
+      "fields": {
+        "user_id": "user_id",
+        "name": "name",
+        "phone": "phone",
+        "email": "email",
+        "created_at": "created_at"
+      }
+    },
+    
+    "transactions": {
+      "table": "transactions",
+      "json_example": "transaction_example",
+      "fields": {
+        "transaction_id": "transaction_id",
+        "momo_txn_id": "momo_txn_id",
+        "amount_cents": "amount_cents",
+        "currency": "amount_currency",
+        "transaction_date": "transaction_date",
+        "narration": "narration",
+        "balance_cents": "balance_cents",
+        "status": "status",
+        "created_at": "created_at"
+      },
+      "computed_fields": {
+        "amount_decimal": "amount_cents / 100",
+        "balance_decimal": "balance_cents / 100"
+      }
+    },
+    
+    "relationships": {
+      "transaction_sender": "transactions.sender_user_id → users.user_id",
+      "transaction_receiver": "transactions.receiver_user_id → users.user_id",
+      "transaction_channel": "transactions.channel_id → channels.channel_id",
+      "assignment_transaction": "assignments.transaction_id → transactions.transaction_id",
+      "assignment_category": "assignments.category_id → transaction_categories.category_id",
+      "log_transaction": "system_logs.transaction_id → transactions.transaction_id"
+    }
+  },
+
+  "api_response_formats": {
+    "single_transaction": {
+      "success": true,
+      "data": "complete_transaction_example",
+      "metadata": {
+        "timestamp": "2025-09-14T10:20:00Z",
+        "version": "1.0"
+      }
+    },
+    
+    "transaction_list": {
+      "success": true,
+      "data": ["transaction_example", "transaction_example", "..."],
+      "pagination": {
+        "page": 1,
+        "per_page": 20,
+        "total_count": 100
+      },
+      "metadata": {
+        "timestamp": "2025-09-14T10:20:00Z",
+        "version": "1.0"
+      }
+    }
+  }
+}
