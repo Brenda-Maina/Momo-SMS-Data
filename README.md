@@ -32,7 +32,7 @@ See the high-level flow and diagram below.
 
 ## Database Design
 
-Our MoMo SMS Data Processing System is supported by a MySQL database designed to ensure data integrity, scalability, and efficient querying. The schema was derived from the XML transaction structure and the ERD created in Week 1.
+Our MoMo SMS Data Processing System is supported by a MySQL database designed to ensure data integrity, scalability, and efficient querying. The schema was derived from the XML transaction structure and the ERD.
 
 ### Schema Overview
 - **Users**: Stores sender and receiver information.  
