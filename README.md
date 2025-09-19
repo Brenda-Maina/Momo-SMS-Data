@@ -58,3 +58,15 @@ The database includes five test records per main table for validation. CRUD oper
 
 The SQL setup script can be found here:  
 [`database/database_setup.sql`](./database/database_setup.sql)
+
+## JSON Data Models
+
+JSON schemas have been created in examples/json_schemas.json that:
+
+- Match the MySQL database structure exactly
+- Include examples for all 6 database tables
+- Show complete transaction objects with nested relationships
+- Demonstrate API response formats
+- Document the SQL-to-JSON field mapping
+
+See examples/JSON_MAPPING_GUIDE.md for complete documentation. 
