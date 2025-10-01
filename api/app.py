@@ -1,5 +1,6 @@
 import sys
 import os
+import base64
 # Add the project root to Python path so we can import etl module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -11,7 +12,47 @@ from etl.parse_xml import parse_sms_xml
 # Load the parsed data
 TRANSACTIONS = parse_sms_xml('data/raw/momo.xml')
 
+# Authentication setup - ADD THIS SECTION
+valid_users = {
+    "admin": "password123",
+    "user": "momo2024"
+}
+
 class MomoAPIHandler(BaseHTTPRequestHandler):
+    
+    def authenticate(self):
+        """Check Basic Authentication credentials"""
+        auth_header = self.headers.get('Authorization')
+        
+        if not auth_header:
+            return False
+        
+        if not auth_header.startswith('Basic '):
+            return False
+        
+        encoded_credentials = auth_header.split(' ')[1]
+        try:
+            decoded_credentials = base64.b64decode(encoded_credentials).decode('utf-8')
+            username, password = decoded_credentials.split(':', 1)
+            
+            if username in valid_users and valid_users[username] == password:
+                return True
+        except:
+            pass
+        
+        return False
+    
+    def send_unauthorized_response(self):
+        """Send 401 Unauthorized response"""
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm="Momo SMS API"')
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response = {
+            "error": "Authentication required",
+            "message": "Valid username and password needed"
+        }
+        self.wfile.write(json.dumps(response).encode())
     
     def _send_response(self, status, data=None):
         """Send JSON response"""
@@ -25,6 +66,11 @@ class MomoAPIHandler(BaseHTTPRequestHandler):
     
     def do_GET(self):
         """Handle GET requests"""
+        # ADD AUTHENTICATION CHECK
+        if not self.authenticate():
+            self.send_unauthorized_response()
+            return
+            
         parsed_path = urlparse.urlparse(self.path)
         
         # GET /transactions - List all transactions
@@ -53,6 +99,11 @@ class MomoAPIHandler(BaseHTTPRequestHandler):
     
     def do_POST(self):
         """Handle POST requests to create new transaction"""
+        # ADD AUTHENTICATION CHECK
+        if not self.authenticate():
+            self.send_unauthorized_response()
+            return
+            
         if self.path == '/transactions' or self.path == '/transactions/':
             content_length = int(self.headers.get('Content-Length', 0))
             if content_length > 0:
@@ -80,6 +131,11 @@ class MomoAPIHandler(BaseHTTPRequestHandler):
     
     def do_PUT(self):
         """Handle PUT requests to update existing transaction"""
+        # ADD AUTHENTICATION CHECK
+        if not self.authenticate():
+            self.send_unauthorized_response()
+            return
+            
         if self.path.startswith('/transactions/'):
             parts = self.path.split('/')
             if len(parts) == 3 and parts[2].isdigit():
@@ -117,6 +173,11 @@ class MomoAPIHandler(BaseHTTPRequestHandler):
     
     def do_DELETE(self):
         """Handle DELETE requests"""
+        # ADD AUTHENTICATION CHECK
+        if not self.authenticate():
+            self.send_unauthorized_response()
+            return
+            
         if self.path.startswith('/transactions/'):
             parts = self.path.split('/')
             if len(parts) == 3 and parts[2].isdigit():
@@ -147,14 +208,19 @@ def run_server(port=8000):
     server_address = ('', port)
     httpd = HTTPServer(server_address, MomoAPIHandler)
     
-    print(f" MoMo API Server running on http://localhost:{port}")
-    print("Available endpoints:")
+    print(f"🚀 MoMo API Server running on http://localhost:{port}")
+    print("📊 Available endpoints:")
     print("   GET    /transactions        - List all transactions")
     print("   GET    /transactions/:id    - Get specific transaction")
     print("   POST   /transactions        - Create new transaction") 
     print("   PUT    /transactions/:id    - Update transaction")
     print("   DELETE /transactions/:id    - Delete transaction")
-    print("\n Test with: curl http://localhost:8000/transactions")
+    print("\n🔐 Authentication Required - Use Basic Auth")
+    print(" Available credentials:")
+    print("   👤 Username: admin, Password: password123")
+    print("   👤 Username: user,  Password: momo2024")
+    print("\n💡 Test with:")
+    print("   curl -H 'Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=' http://localhost:8000/transactions")
     
     httpd.serve_forever()
 
